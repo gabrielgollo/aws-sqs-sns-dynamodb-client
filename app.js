@@ -30,6 +30,7 @@ if (configFile) {
     
             aws.config.sqs = { 'endpoint': overrides.sqs_endpoint }
             aws.config.sns = { 'endpoint': overrides.sns_endpoint }
+            aws.config.dynamodb = { 'endpoint': overrides.dynamodb_endpoint }
 }
         
 
@@ -56,13 +57,14 @@ var ui = {
 
 
 var snsController = require('./controllers/snsController')
-var sqsController = require('./controllers/sqsController')
+var sqsController = require('./controllers/sqsController');
+const { startDynamodb } = require('./dynamodb-server');
 
 snsController(aws, app, ui);
 sqsController(aws, app, ui);
 
 // server listen port - can be overriden by an environment variable
-var port = process.env.PORT || 3000
+var port = process.env.PORT || 8200
 
 // configure assets and views
 app.use('/assets', express.static(__dirname+'/public'))
@@ -77,10 +79,10 @@ app.get('/', function (req, res) {
 })
 
 
+startDynamodb(aws)
 // Start server.
 app.listen(port)
-console.log('AWS SNS SQS test server listening on port', port);
-
+console.log(`AWS SNS SQS test server listening on http://localhost:${port}`);
 
 
 
